@@ -8,6 +8,6 @@ namespace BookStore.Data.Models
         public string FullName { get; set; }
 
         //Navigations Properties
-        public List<Book_Author> Book_Author { get; set; }
+        public List<Book_Author> Book_Authors { get; set; }
     }
 }

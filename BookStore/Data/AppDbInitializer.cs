@@ -24,7 +24,6 @@ namespace BookStore.Data
                         DateRead = DateTime.Now.AddDays(-10),
                         Rate = 4,
                         Genre = "Biography",
-                        Author = "Aidan Dodson",
                         CoverUrl = "https://sanet.pics/storage-8/0222/xVyUQXelFyC6kNFk3haU0XOdayijBO7G.jpg",
                         DateAdded = DateTime.Now
                     },
@@ -34,7 +33,6 @@ namespace BookStore.Data
                         Description = "With the thought of treasure, Isle of Wight islander, Derek Williams researched ancient local wreck records.",
                         IsRead = false,
                         Genre = "Biography",
-                        Author = "Aidan Dodson",
                         CoverUrl = "https://sanet.pics/storage-8/0222/BXtkVlXEroyBZx8ori0pyRF7eCZxsbvK.jpg",
                         DateAdded = DateTime.Now
                     }
