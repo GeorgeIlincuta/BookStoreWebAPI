@@ -1,7 +1,9 @@
 ﻿using BookStore.Data.Models;
 using BookStore.Data.Models.ViewModel;
+using BookStore.Exceptions;
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace BookStore.Data.Services
 {
@@ -13,15 +15,24 @@ namespace BookStore.Data.Services
             _context = context;
         }
 
-        public void AddPublisher(PublisherVM publisher)
+        public Publisher AddPublisher(PublisherVM publisher)
         {
+            if (StrigStartWithNumber(publisher.Name))
+            {
+                throw new PublisherNameException("Name starts with number", publisher.Name);
+            }
+
             var _publisher = new Publisher()
             {
                 Name = publisher.Name
             };
             _context.Publishers.Add(_publisher);
             _context.SaveChanges();
+
+            return _publisher;
         }
+
+        public Publisher GetPublisherById(int id) => _context.Publishers.FirstOrDefault(x => x.Id == id);
 
         public PublisherWithBooksAndAuthorsVM GetPublisherData(int publisherId)
         {
@@ -48,6 +59,12 @@ namespace BookStore.Data.Services
                 _context.Publishers.Remove(_publisher);
                 _context.SaveChanges();
             }
+            else
+            {
+                throw new Exception($"The publisher with id: {id} does not exist");
+            }
         }
+
+        private bool StrigStartWithNumber(string name) => (Regex.IsMatch(name, @"^\d"));
     }
 }
