@@ -1,7 +1,9 @@
 ﻿using BookStore.Data.Models;
 using BookStore.Data.Models.ViewModel;
+using BookStore.Data.Paging;
 using BookStore.Exceptions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -13,6 +15,35 @@ namespace BookStore.Data.Services
         public PublishersService(AppDbContext context)
         {
             _context = context;
+        }
+
+        public List<Publisher> GetAllPublishers(string sortBy, string searchString, int? pageNumber)
+        {
+            var allPublishers = _context.Publishers.OrderBy(n => n.Name).ToList();
+
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy)
+                {
+                    case "name_desc":
+                        allPublishers = allPublishers.OrderByDescending(n => n.Name).ToList();
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                allPublishers = allPublishers.Where(n => n.Name.Contains(searchString,
+                    StringComparison.CurrentCultureIgnoreCase)).ToList();
+            }
+
+            // Paging
+            int pageSize = 5;
+            allPublishers = PaginatedList<Publisher>.Create(allPublishers.AsQueryable(), pageNumber ?? 1, pageSize);
+
+            return allPublishers;
         }
 
         public Publisher AddPublisher(PublisherVM publisher)
