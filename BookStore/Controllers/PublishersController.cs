@@ -3,6 +3,7 @@ using BookStore.Data.Services;
 using BookStore.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 
 namespace BookStore.Controllers
@@ -12,10 +13,12 @@ namespace BookStore.Controllers
     public class PublishersController : ControllerBase
     {
         private readonly PublishersService _publisherService;
+        private readonly ILogger<PublishersController> _logger;
 
-        public PublishersController(PublishersService publisherService)
+        public PublishersController(PublishersService publisherService, ILogger<PublishersController> logger)
         {
             _publisherService = publisherService;
+            _logger = logger;
         }
 
         [HttpGet("get-all-publishers")]
@@ -23,6 +26,7 @@ namespace BookStore.Controllers
         {
             try
             {
+                _logger.LogInformation("This is just a log in GetAllPublishers()");
                 var _result = _publisherService.GetAllPublishers(sortBy, searchString, pageNumber);
                 return Ok(_result);
             }
