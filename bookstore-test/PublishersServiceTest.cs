@@ -1,9 +1,13 @@
 using BookStore.Data;
 using BookStore.Data.Models;
+using BookStore.Data.Models.ViewModel;
+using BookStore.Data.Services;
+using BookStore.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace bookstore_test
 {
@@ -14,6 +18,7 @@ namespace bookstore_test
             .Options;
 
         AppDbContext context;
+        PublishersService publishersService;
 
         [OneTimeSetUp]
         public void Setup()
@@ -22,6 +27,102 @@ namespace bookstore_test
             context.Database.EnsureCreated();
 
             SeedDatabase();
+
+            publishersService = new PublishersService(context);
+        }
+
+        [Test, Order(1)]
+        public void GetAllPublishers_WithNoSortBy_WithNoSearchString_WithNoPageNumber_Test()
+        {
+            var result = publishersService.GetAllPublishers("", "", null);
+            
+            Assert.That(result.Count, Is.EqualTo(5));
+        }
+
+        [Test, Order(2)]
+        public void GetAllPublishers_WithNoSortBy_WithNoSearchString_WithPageNumber_Test()
+        {
+            var result = publishersService.GetAllPublishers("", "", 2);
+
+            Assert.That(result.Count, Is.EqualTo(1));
+        }
+
+        [Test, Order(3)]
+        public void GetAllPublishers_WithNoSortBy_WithSearchString_WithNoPageNumber_Test()
+        {
+            var result = publishersService.GetAllPublishers("", "3", null);
+
+            Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(result.FirstOrDefault().Name, Is.EqualTo("Publisher 3"));
+        }
+
+        [Test, Order(4)]
+        public void GetAllPublishers_WithSortBy_WithNoSearchString_WithNoPageNumber_Test()
+        {
+            var result = publishersService.GetAllPublishers("name_desc", "", null);
+
+            Assert.That(result.Count, Is.EqualTo(5));
+            Assert.That(result.FirstOrDefault().Name, Is.EqualTo("Publisher 6"));
+        }
+
+        [Test, Order(5)]
+        public void GetPublisherById_WithResponse_Test()
+        {
+            var result = publishersService.GetPublisherById(1);
+
+            Assert.That(result.Id, Is.EqualTo(1));
+            Assert.That(result.Name, Is.EqualTo("Publisher 1"));
+
+        }
+
+        [Test, Order(6)]
+        public void GetPublisherById_WithoutResponse_Test()
+        {
+            var result = publishersService.GetPublisherById(99);
+
+            Assert.That(result, Is.Null);
+
+        }
+
+        [Test, Order(7)]
+        public void AddPublisher_WithException_Test()
+        {
+            var newPublisher = new PublisherVM()
+            {
+                Name = "123 With Exception",
+            };
+
+            Assert.That(() => publishersService.AddPublisher(newPublisher), 
+                Throws.Exception.TypeOf<PublisherNameException>().With.Message.EqualTo("Name starts with number"));
+        }
+
+        [Test, Order(8)]
+        public void AddPublisher_WithoutException_Test()
+        {
+            var newPublisher = new PublisherVM()
+            {
+                Name = "Without Exception",
+            };
+
+            var result = publishersService.AddPublisher(newPublisher);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Name, Does.StartWith("Without"));
+            Assert.That(result.Id, Is.Not.Null);
+        }
+
+        [Test, Order(9)]
+        public void GetPublisherData_Test()
+        {
+            var result = publishersService.GetPublisherData(1);
+
+            Assert.That(result.Name, Is.EqualTo("Publisher 1"));
+            Assert.That(result.BookAuthors, Is.Not.Empty);
+            Assert.That(result.BookAuthors.Count, Is.GreaterThan(0));
+
+            var firstBookName = result.BookAuthors.OrderBy(n => n.BookName).FirstOrDefault().BookName;
+            Assert.That(firstBookName, Is.EqualTo("Book 1 Title"));
+
         }
 
         [OneTimeTearDown]
@@ -37,17 +138,32 @@ namespace bookstore_test
                 new Publisher() 
                 {
                     Id = 1,
-                    Name = "publisher 1"
+                    Name = "Publisher 1"
                 },
                 new Publisher()
                 {
                     Id = 2,
-                    Name = "publisher 2"
+                    Name = "Publisher 2"
                 },
                 new Publisher()
                 {
                     Id = 3,
-                    Name = "publisher 3"
+                    Name = "Publisher 3"
+                },
+                new Publisher()
+                {
+                    Id = 4,
+                    Name = "Publisher 4"
+                },
+                new Publisher()
+                {
+                    Id = 5,
+                    Name = "Publisher 5"
+                },
+                new Publisher()
+                {
+                    Id = 6,
+                    Name = "Publisher 6"
                 }
             };
             context.Publishers.AddRange(publishers);
@@ -72,7 +188,7 @@ namespace bookstore_test
                 new Book()
                 {
                     Id = 1,
-                    Title = "Book 1 Description",
+                    Title = "Book 1 Title",
                     IsRead = false,
                     Genre = "Genre",
                     CoverUrl = "https://sanet.pics/storage-7/1221/9mCOROwJtoNN4OVMZFG51FRR6MucjVcs.jpg",
@@ -82,7 +198,7 @@ namespace bookstore_test
                 new Book()
                 {
                     Id = 2,
-                    Title = "Book 2 Description",
+                    Title = "Book 2 Title",
                     IsRead = false,
                     Genre = "Genre",
                     CoverUrl = "https://sanet.pics/storage-7/1221/9mCOROwJtoNN4OVMZFG51FRR6MucjVcs.jpg",
