@@ -81,7 +81,7 @@ namespace BookStore.Data.Services
             return _publisherData;
         }
 
-        internal void DeletePublisherById(int id)
+        public void DeletePublisherById(int id)
         {
             var _publisher = _context.Publishers.FirstOrDefault(n => n.Id == id);
 

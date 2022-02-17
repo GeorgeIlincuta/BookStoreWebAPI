@@ -125,6 +125,15 @@ namespace bookstore_test
 
         }
 
+        [Test, Order(10)]
+        public void DeletePubisher_Test()
+        {
+            int countBeforeDelete = context.Publishers.Count();
+
+            publishersService.DeletePublisherById(1);
+            Assert.That(countBeforeDelete, Is.GreaterThan(context.Publishers.Count()));
+        }
+
         [OneTimeTearDown]
         public void CleanUp()
         {
