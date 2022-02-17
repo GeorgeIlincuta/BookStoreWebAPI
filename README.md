@@ -7,4 +7,4 @@
 
 ## End points:
 
-![End Points](https://github.com/GeorgeIlincuta/BookStoreWebAPI/blob/main/endpoints.png)
+![End Points](https://github.com/GeorgeIlincuta/BookStoreWebAPI/blob/main/endpoints-strucutre.png)
